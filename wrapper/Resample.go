@@ -16,22 +16,24 @@ type Resample struct {
 	targetSampleFmt  avutil.SampleFormat
 }
 
-func NewResample(rate int, channelLayout string, format avutil.SampleFormat) *Resample {
+func NewResample(rate int, channelLayout string, sampleFormat string) *Resample {
 
-	layout := avutil.GetChannelLayout(channelLayout)
+	layout := avutil.AvGetChannelLayout(channelLayout)
+	format := avutil.SampleFormat(avutil.AvGetSampleFormat(sampleFormat))
 
-	if layout == 0 {
+	if layout == 0 || format == avutil.AV_SAMPLE_FMT_NONE {
 		return nil
 	}
+
 	return &Resample{
-		targetLayout:     avutil.GetChannelLayout(channelLayout),
+		targetLayout:     layout,
 		targetSampleRate: rate,
 		targetSampleFmt:  format,
 	}
 }
 
 func (r *Resample) reallocFrame(in *avutil.Frame) error {
-	aframe := avutil.AvGetFrameAudioInfo(in)
+	aframe := avutil.GetFrameAudioInfo(in)
 
 	nchannels := avutil.AvGetNumberOfChannels(aframe.ChannelLayout)
 
@@ -45,7 +47,7 @@ func (r *Resample) reallocFrame(in *avutil.Frame) error {
 	aframe.SampleRate = r.targetSampleRate
 	//aframe.Samples = aframe.Samples
 
-	avutil.AvSetFrameAudioInfo(aframe, r.frame)
+	avutil.SetFrameAudioInfo(aframe, r.frame)
 
 	return nil
 }
@@ -58,7 +60,7 @@ func (r *Resample) init(in *avutil.Frame) error {
 		return fmt.Errorf("Can not allocate SWR")
 	}
 
-	aframe := avutil.AvGetFrameAudioInfo(in)
+	aframe := avutil.GetFrameAudioInfo(in)
 
 	// setting up conversion
 	r.swr.SwrSetOptionInt("in_channel_layout", aframe.ChannelLayout)

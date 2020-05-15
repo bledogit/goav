@@ -213,24 +213,7 @@ func AvFrameVideoInfo(f *Frame) (width int, height int, linesize [8]int32, data 
 	return
 }
 
-func AvGetFrameAudioInfo(f *Frame) (af AudioFrame) {
-	af.Samples = int(f.nb_samples)
-	af.SampleRate = int(f.sample_rate)
-	af.Pts = int(f.pts)
-	af.ChannelLayout = int(f.channel_layout)
-	af.Format = SampleFormat(f.format)
-
-	return
-}
-
-func AvSetFrameAudioInfo(af AudioFrame, f *Frame) {
-	f.nb_samples = C.int(af.Samples)
-	f.sample_rate = C.int(af.SampleRate)
-	f.pts = C.longlong(af.Pts)
-	f.channel_layout = C.ulonglong(af.ChannelLayout)
-	f.format = C.int(af.Format)
-}
-
+// AvGetNumberOfChannels calls av_get_channel_layout_nb_channels
 func AvGetNumberOfChannels(layout int) int {
 	return int(C.av_get_channel_layout_nb_channels(C.ulonglong(layout)))
 }
@@ -239,7 +222,7 @@ func GetBestEffortTimestamp(f *Frame) int64 {
 	return int64(f.best_effort_timestamp)
 }
 
-/** GetChannelLayout Return a channel layout id that matches name, or 0 if no match is found.
+/** AvGetChannelLayout Return a channel layout id that matches name, or 0 if no match is found.
 *
 * name can be one or several of the following notations,
 * separated by '+' or '|':
@@ -255,8 +238,46 @@ func GetBestEffortTimestamp(f *Frame) int64 {
 *
 * Example: "stereo+FC"  "2c+FC"  "2c+1c"  "0x7"
  */
-func GetChannelLayout(fmt string) int {
+func AvGetChannelLayout(fmt string) int {
 	fmtC := C.CString(fmt)
 	defer C.free(unsafe.Pointer(fmtC))
 	return int(C.av_get_channel_layout(fmtC))
+}
+
+/** AvGetSampleFormat gets sample format from string
+* AV_SAMPLE_FMT_U8 u8
+* AV_SAMPLE_FMT_S16 s16
+* AV_SAMPLE_FMT_S32 s32
+* AV_SAMPLE_FMT_FLT flt
+* AV_SAMPLE_FMT_DBL dbl
+* AV_SAMPLE_FMT_U8P u8p
+* AV_SAMPLE_FMT_S16P s16p
+* AV_SAMPLE_FMT_S32P s32p
+* AV_SAMPLE_FMT_FLTP fltp
+* AV_SAMPLE_FMT_DBLP dblp
+ */
+func AvGetSampleFormat(fmt string) int {
+	fmtC := C.CString(fmt)
+	defer C.free(unsafe.Pointer(fmtC))
+	return int(C.av_get_sample_fmt(fmtC))
+}
+
+// GetFrameAudioInfo exports audio frame information from AvFrame
+func GetFrameAudioInfo(f *Frame) (af AudioFrame) {
+	af.Samples = int(f.nb_samples)
+	af.SampleRate = int(f.sample_rate)
+	af.Pts = int(f.pts)
+	af.ChannelLayout = int(f.channel_layout)
+	af.Format = SampleFormat(f.format)
+
+	return
+}
+
+// SetFrameAudioInfo Sets audio frame information to avframe
+func SetFrameAudioInfo(af AudioFrame, f *Frame) {
+	f.nb_samples = C.int(af.Samples)
+	f.sample_rate = C.int(af.SampleRate)
+	f.pts = C.longlong(af.Pts)
+	f.channel_layout = C.ulonglong(af.ChannelLayout)
+	f.format = C.int(af.Format)
 }

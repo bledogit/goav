@@ -13,7 +13,7 @@ func SaveAudioFrame(file *os.File, frame *avutil.Frame) {
 	// Open file
 	data := avutil.Data(frame)
 	linesize := avutil.Linesize(frame)
-	af := avutil.AvGetFrameAudioInfo(frame)
+	af := avutil.GetFrameAudioInfo(frame)
 	channels := avutil.AvGetNumberOfChannels(af.ChannelLayout)
 	buf := C.GoBytes(unsafe.Pointer(data[0]), C.int(af.Samples*channels*2))
 
@@ -72,7 +72,7 @@ func main() {
 	err = decoder.Init(demuxer, stream)
 	check(err)
 
-	resample := wrapper.NewResample(44100, "5.1", avutil.AV_SAMPLE_FMT_S16)
+	resample := wrapper.NewResample(44100, "5.1", "s16")
 	if resample == nil {
 		panic("can not initialize resample")
 	}
@@ -87,7 +87,7 @@ func main() {
 
 			if frame != nil {
 
-				af := avutil.AvGetFrameAudioInfo(frame)
+				af := avutil.GetFrameAudioInfo(frame)
 				fmt.Printf("frame %d, %+v\n", packet.StreamIndex(), af)
 
 				frameout, err := resample.Resample(frame)
