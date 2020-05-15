@@ -6,6 +6,7 @@ package avutil
 /*
 	#cgo pkg-config: libavutil
 	#include <libavutil/frame.h>
+    #include <libavutil/channel_layout.h>
 	#include <stdlib.h>
 */
 import "C"
@@ -23,18 +24,39 @@ type (
 	Frame               C.struct_AVFrame
 	AvFrameSideData     C.struct_AVFrameSideData
 	AvFrameSideDataType C.enum_AVFrameSideDataType
+	SampleFormat        C.enum_AVSampleFormat
 )
+
+const (
+	AV_SAMPLE_FMT_NONE = -1
+	AV_SAMPLE_FMT_U8   = 0 ///< unsigned 8 bits
+	AV_SAMPLE_FMT_S16  = 1 ///< signed 16 bits
+	AV_SAMPLE_FMT_S32  = 2 ///< signed 32 bits
+	AV_SAMPLE_FMT_FLT  = 3 ///< float
+	AV_SAMPLE_FMT_DBL  = 4 ///< double
+
+	AV_SAMPLE_FMT_U8P  = 5  ///< unsigned 8 bits, planar
+	AV_SAMPLE_FMT_S16P = 6  ///< signed 16 bits, planar
+	AV_SAMPLE_FMT_S32P = 7  ///< signed 32 bits, planar
+	AV_SAMPLE_FMT_FLTP = 8  ///< float, planar
+	AV_SAMPLE_FMT_DBLP = 9  ///< double, planar
+	AV_SAMPLE_FMT_S64  = 10 ///< signed 64 bits
+	AV_SAMPLE_FMT_S64P = 11 ///< signed 64 bits, planar
+
+	AV_SAMPLE_FMT_NB = 12 ///< Number of sample formats. DO NOT USE if linking dynamically
+)
+
+// AudioFrame exports AvFrame fields
+type AudioFrame struct {
+	Samples       int
+	SampleRate    int
+	Pts           int
+	ChannelLayout int
+	Format        SampleFormat
+}
 
 func AvprivFrameGetMetadatap(f *Frame) *Dictionary {
 	return (*Dictionary)(unsafe.Pointer(f.metadata))
-}
-
-func AvFrameSetQpTable(f *Frame, b *AvBufferRef, s, q int) int {
-	return int(C.av_frame_set_qp_table((*C.struct_AVFrame)(unsafe.Pointer(f)), (*C.struct_AVBufferRef)(unsafe.Pointer(b)), C.int(s), C.int(q)))
-}
-
-func AvFrameGetQpTable(f *Frame, s, t *int) int8 {
-	return int8(*C.av_frame_get_qp_table((*C.struct_AVFrame)(unsafe.Pointer(f)), (*C.int)(unsafe.Pointer(s)), (*C.int)(unsafe.Pointer(t))))
 }
 
 //Allocate an Frame and set its fields to default values.
@@ -178,7 +200,7 @@ func AvSetFrame(f *Frame, w int, h int, pixFmt int) (err error) {
 	return
 }
 
-func AvFrameGetInfo(f *Frame) (width int, height int, linesize [8]int32, data [8]*uint8) {
+func AvFrameVideoInfo(f *Frame) (width int, height int, linesize [8]int32, data [8]*uint8) {
 	width = int(f.linesize[0])
 	height = int(f.height)
 	for i := range linesize {
@@ -191,21 +213,50 @@ func AvFrameGetInfo(f *Frame) (width int, height int, linesize [8]int32, data [8
 	return
 }
 
+func AvGetFrameAudioInfo(f *Frame) (af AudioFrame) {
+	af.Samples = int(f.nb_samples)
+	af.SampleRate = int(f.sample_rate)
+	af.Pts = int(f.pts)
+	af.ChannelLayout = int(f.channel_layout)
+	af.Format = SampleFormat(f.format)
+
+	return
+}
+
+func AvSetFrameAudioInfo(af AudioFrame, f *Frame) {
+	f.nb_samples = C.int(af.Samples)
+	f.sample_rate = C.int(af.SampleRate)
+	f.pts = C.longlong(af.Pts)
+	f.channel_layout = C.ulonglong(af.ChannelLayout)
+	f.format = C.int(af.Format)
+}
+
+func AvGetNumberOfChannels(layout int) int {
+	return int(C.av_get_channel_layout_nb_channels(C.ulonglong(layout)))
+}
+
 func GetBestEffortTimestamp(f *Frame) int64 {
 	return int64(f.best_effort_timestamp)
 }
 
-// //static int get_video_buffer (Frame *frame, int align)
-// func GetVideoBuffer(f *Frame, a int) int {
-// 	return int(C.get_video_buffer(f, C.int(a)))
-// }
-
-// //static int get_audio_buffer (Frame *frame, int align)
-// func GetAudioBuffer(f *Frame, a int) int {
-// 	return C.get_audio_buffer(f, C.int(a))
-// }
-
-// //static void get_frame_defaults (Frame *frame)
-// func GetFrameDefaults(f *Frame) {
-// 	C.get_frame_defaults(*C.struct_AVFrame(f))
-// }
+/** GetChannelLayout Return a channel layout id that matches name, or 0 if no match is found.
+*
+* name can be one or several of the following notations,
+* separated by '+' or '|':
+* - the name of an usual channel layout (mono, stereo, 4.0, quad, 5.0,
+*   5.0(side), 5.1, 5.1(side), 7.1, 7.1(wide), downmix);
+* - the name of a single channel (FL, FR, FC, LFE, BL, BR, FLC, FRC, BC,
+*   SL, SR, TC, TFL, TFC, TFR, TBL, TBC, TBR, DL, DR);
+* - a number of channels, in decimal, followed by 'c', yielding
+*   the default channel layout for that number of channels (@see
+*   av_get_default_channel_layout);
+* - a channel layout mask, in hexadecimal starting with "0x" (see the
+*   AV_CH_* macros).
+*
+* Example: "stereo+FC"  "2c+FC"  "2c+1c"  "0x7"
+ */
+func GetChannelLayout(fmt string) int {
+	fmtC := C.CString(fmt)
+	defer C.free(unsafe.Pointer(fmtC))
+	return int(C.av_get_channel_layout(fmtC))
+}

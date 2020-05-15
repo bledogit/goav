@@ -4,11 +4,15 @@
 package swresample
 
 /*
-	#cgo pkg-config: libswresample
+	#cgo pkg-config: libswresample libavutil
 	#include <libswresample/swresample.h>
+    #include <libavutil/opt.h>
+	#include <libavutil/samplefmt.h>
+	#include <libavutil/channel_layout.h>
 */
 import "C"
 import (
+	"github.com/giorgisio/goav/avutil"
 	"unsafe"
 )
 
@@ -87,4 +91,16 @@ func (s *Context) SwrConvertFrame(o, i *Frame) int {
 //Configure or reconfigure the Context using the information provided by the AvFrames.
 func (s *Context) SwrConfigFrame(o, i *Frame) int {
 	return int(C.swr_config_frame((*C.struct_SwrContext)(s), (*C.struct_AVFrame)(o), (*C.struct_AVFrame)(i)))
+}
+
+func (s *Context) SwrSetOptionInt(option string, value int) {
+	Coption := C.CString(option)
+	defer C.free(unsafe.Pointer(Coption))
+	C.av_opt_set_int(unsafe.Pointer(s), Coption, C.longlong(value), 0)
+}
+
+func (s *Context) SwrSetSampleFmt(option string, format avutil.SampleFormat) {
+	Coption := C.CString(option)
+	defer C.free(unsafe.Pointer(Coption))
+	C.av_opt_set_int(unsafe.Pointer(s), Coption, C.longlong(format), 0)
 }

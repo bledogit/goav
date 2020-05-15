@@ -6,6 +6,13 @@
 //Supported formats (muxers and demuxers) provided by the libavformat library
 package avformat
 
+import "C"
+import (
+	"github.com/giorgisio/goav/avcodec"
+	"github.com/giorgisio/goav/avutil"
+	"unsafe"
+)
+
 //#cgo pkg-config: libavformat libavcodec libavutil libavdevice libavfilter libswresample libswscale
 //#include <stdio.h>
 //#include <stdlib.h>
@@ -17,13 +24,12 @@ package avformat
 //#include <libavutil/avutil.h>
 //#include <libavutil/opt.h>
 //#include <libavdevice/avdevice.h>
+//
+//int AvReadFunction(void* opaque, uint8_t* buf, int buf_size) {
+//
+//  return 0;
+//}
 import "C"
-import (
-	"unsafe"
-
-	"github.com/giorgisio/goav/avcodec"
-	"github.com/giorgisio/goav/avutil"
-)
 
 type (
 	AvProbeData                C.struct_AVProbeData
@@ -55,6 +61,27 @@ type (
 )
 
 type File C.FILE
+type GoReadCallback func(unsafe.Pointer, C.uint8_t, C.int) C.int
+
+func AvioAllocContext(read *GoReadCallback, s int) *AvIOContext {
+	buffer := (*C.uchar)(C.malloc(C.ulong(s) + C.ulong(16)))
+	//defer C.free(unsafe.Pointer(buffer))
+	return (*AvIOContext)(C.avio_alloc_context(
+		buffer,                       // unsignet char* buffer
+		C.int(s),                     // int buffer_size
+		C.int(0),                     // int write_flag
+		nil,                          // void* opaque
+		(*[0]byte)(C.AvReadFunction), // read funcion 	int(*)(void *opaque, uint8_t *buf, int buf_size)
+		nil,                          // write function   int(*)(void *opaque, uint8_t *buf, int buf_size)
+		nil))                         // seek function    int64_t(*)(void *opaque, int64_t offset, int whence)
+}
+
+//Allocate an Context.
+//func AvformatAllocContextWithAvio(avioc *AvIOContext) *Context {
+//	avfctx := C.avformat_alloc_context()
+//	avfctx.pb = avioc
+//	return (*Context)(avfctx)
+//}
 
 //Allocate and read the payload of a packet and initialize its fields with default values.
 func (ctxt *AvIOContext) AvGetPacket(pkt *avcodec.Packet, s int) int {
@@ -70,24 +97,6 @@ func (ctxt *AvIOContext) Close() error {
 	return avutil.ErrorFromCode(int(C.avio_close((*C.AVIOContext)(unsafe.Pointer(ctxt)))))
 }
 
-func (f *InputFormat) AvRegisterInputFormat() {
-	C.av_register_input_format((*C.struct_AVInputFormat)(f))
-}
-
-func (f *OutputFormat) AvRegisterOutputFormat() {
-	C.av_register_output_format((*C.struct_AVOutputFormat)(f))
-}
-
-//If f is NULL, returns the first registered input format, if f is non-NULL, returns the next registered input format after f or NULL if f is the last one.
-func (f *InputFormat) AvIformatNext() *InputFormat {
-	return (*InputFormat)(C.av_iformat_next((*C.struct_AVInputFormat)(f)))
-}
-
-//If f is NULL, returns the first registered output format, if f is non-NULL, returns the next registered output format after f or NULL if f is the last one.
-func (f *OutputFormat) AvOformatNext() *OutputFormat {
-	return (*OutputFormat)(C.av_oformat_next((*C.struct_AVOutputFormat)(f)))
-}
-
 //Return the LIBAvFORMAT_VERSION_INT constant.
 func AvformatVersion() uint {
 	return uint(C.avformat_version())
@@ -101,11 +110,6 @@ func AvformatConfiguration() string {
 //Return the libavformat license.
 func AvformatLicense() string {
 	return C.GoString(C.avformat_license())
-}
-
-//Initialize libavformat and register all the muxers, demuxers and protocols.
-func AvRegisterAll() {
-	C.av_register_all()
 }
 
 //Do global initialization of network components.

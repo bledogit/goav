@@ -96,10 +96,6 @@ func main() {
 			}
 			// Copy context
 			pCodecCtx := pCodec.AvcodecAllocContext3()
-			if pCodecCtx.AvcodecCopyContext((*avcodec.Context)(unsafe.Pointer(pCodecCtxOrig))) != 0 {
-				fmt.Println("Couldn't copy codec context")
-				os.Exit(1)
-			}
 
 			// Open codec
 			if pCodecCtx.AvcodecOpen2(pCodec, nil) < 0 {
@@ -179,7 +175,7 @@ func main() {
 				}
 
 				// Free the packet that was allocated by av_read_frame
-				packet.AvFreePacket()
+				//packet.AvFreePacket()
 			}
 
 			// Free the RGB image

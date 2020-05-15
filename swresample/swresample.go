@@ -5,6 +5,8 @@
 // The process of changing the sampling rate of a discrete signal to obtain a new discrete representation of the underlying continuous signal.
 package swresample
 
+import "C"
+
 /*
 	#cgo pkg-config: libswresample
 	#include <libswresample/swresample.h>
