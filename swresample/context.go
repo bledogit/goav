@@ -93,14 +93,14 @@ func (s *Context) SwrConfigFrame(o, i *Frame) int {
 	return int(C.swr_config_frame((*C.struct_SwrContext)(s), (*C.struct_AVFrame)(o), (*C.struct_AVFrame)(i)))
 }
 
-func (s *Context) SwrSetOptionInt(option string, value int) {
+func (s *Context) SwrSetOptionInt(option string, value int64) {
 	Coption := C.CString(option)
 	defer C.free(unsafe.Pointer(Coption))
-	C.av_opt_set_int(unsafe.Pointer(s), Coption, C.longlong(value), 0)
+	C.av_opt_set_int(unsafe.Pointer(s), Coption, C.int64_t(value), 0)
 }
 
 func (s *Context) SwrSetSampleFmt(option string, format avutil.SampleFormat) {
 	Coption := C.CString(option)
 	defer C.free(unsafe.Pointer(Coption))
-	C.av_opt_set_int(unsafe.Pointer(s), Coption, C.longlong(format), 0)
+	C.av_opt_set_int(unsafe.Pointer(s), Coption, C.int64_t(format), 0)
 }

@@ -11,8 +11,8 @@ type Resample struct {
 	swr              *swresample.Context
 	frame            *avutil.Frame
 	initialized      bool
-	targetSampleRate int
-	targetLayout     int
+	targetSampleRate int64
+	targetLayout     int64
 	targetSampleFmt  avutil.SampleFormat
 }
 
@@ -26,8 +26,8 @@ func NewResample(rate int, channelLayout string, sampleFormat string) *Resample 
 	}
 
 	return &Resample{
-		targetLayout:     layout,
-		targetSampleRate: rate,
+		targetLayout:     int64(layout),
+		targetSampleRate: int64(rate),
 		targetSampleFmt:  format,
 	}
 }
@@ -35,7 +35,7 @@ func NewResample(rate int, channelLayout string, sampleFormat string) *Resample 
 func (r *Resample) reallocFrame(in *avutil.Frame) error {
 	aframe := avutil.GetFrameAudioInfo(in)
 
-	nchannels := avutil.AvGetNumberOfChannels(aframe.ChannelLayout)
+	nchannels := int64(avutil.AvGetNumberOfChannels(aframe.ChannelLayout))
 
 	///
 	if ret := avutil.AvAllocSamples(r.frame, nchannels, aframe.Samples, r.targetSampleFmt, 0); ret <= 0 {

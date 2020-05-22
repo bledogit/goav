@@ -48,10 +48,10 @@ const (
 
 // AudioFrame exports AvFrame fields
 type AudioFrame struct {
-	Samples       int
-	SampleRate    int
-	Pts           int
-	ChannelLayout int
+	Samples       int64
+	SampleRate    int64
+	Pts           int64
+	ChannelLayout int64
 	Format        SampleFormat
 }
 
@@ -214,8 +214,8 @@ func AvFrameVideoInfo(f *Frame) (width int, height int, linesize [8]int32, data 
 }
 
 // AvGetNumberOfChannels calls av_get_channel_layout_nb_channels
-func AvGetNumberOfChannels(layout int) int {
-	return int(C.av_get_channel_layout_nb_channels(C.ulonglong(layout)))
+func AvGetNumberOfChannels(layout int64) int {
+	return int(C.av_get_channel_layout_nb_channels(C.uint64_t(layout)))
 }
 
 func GetBestEffortTimestamp(f *Frame) int64 {
@@ -264,10 +264,10 @@ func AvGetSampleFormat(fmt string) int {
 
 // GetFrameAudioInfo exports audio frame information from AvFrame
 func GetFrameAudioInfo(f *Frame) (af AudioFrame) {
-	af.Samples = int(f.nb_samples)
-	af.SampleRate = int(f.sample_rate)
-	af.Pts = int(f.pts)
-	af.ChannelLayout = int(f.channel_layout)
+	af.Samples = int64(f.nb_samples)
+	af.SampleRate = int64(f.sample_rate)
+	af.Pts = int64(f.pts)
+	af.ChannelLayout = int64(f.channel_layout)
 	af.Format = SampleFormat(f.format)
 
 	return
@@ -277,7 +277,7 @@ func GetFrameAudioInfo(f *Frame) (af AudioFrame) {
 func SetFrameAudioInfo(af AudioFrame, f *Frame) {
 	f.nb_samples = C.int(af.Samples)
 	f.sample_rate = C.int(af.SampleRate)
-	f.pts = C.longlong(af.Pts)
-	f.channel_layout = C.ulonglong(af.ChannelLayout)
+	f.pts = C.int64_t(af.Pts)
+	f.channel_layout = C.uint64_t(af.ChannelLayout)
 	f.format = C.int(af.Format)
 }

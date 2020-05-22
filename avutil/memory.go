@@ -126,7 +126,7 @@ func AvFastMalloc(p unsafe.Pointer, s *uint, m uintptr) {
 	C.av_fast_malloc(p, (*C.uint)(unsafe.Pointer(s)), (C.size_t)(m))
 }
 
-func AvAllocSamples(frame *Frame, nb_channels int, nb_samples int, fmt SampleFormat, align int) int {
+func AvAllocSamples(frame *Frame, nb_channels int64, nb_samples int64, fmt SampleFormat, align int) int {
 
 	return int(C.av_samples_alloc(
 		(**C.uint8_t)(unsafe.Pointer(&frame.data[0])),

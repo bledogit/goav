@@ -15,7 +15,7 @@ func SaveAudioFrame(file *os.File, frame *avutil.Frame) {
 	linesize := avutil.Linesize(frame)
 	af := avutil.GetFrameAudioInfo(frame)
 	channels := avutil.AvGetNumberOfChannels(af.ChannelLayout)
-	buf := C.GoBytes(unsafe.Pointer(data[0]), C.int(af.Samples*channels*2))
+	buf := C.GoBytes(unsafe.Pointer(data[0]), C.int(af.Samples*int64(channels)*2))
 
 	file.Write(buf)
 	fmt.Println(linesize)
