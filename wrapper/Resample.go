@@ -93,10 +93,16 @@ func (r *Resample) Resample(in *avutil.Frame) (out *avutil.Frame, err error) {
 		r.initialized = true
 	}
 
-	if ret := r.swr.SwrConvertFrame((*swresample.Frame)(unsafe.Pointer(r.frame)),
-		(*swresample.Frame)(unsafe.Pointer(in))); ret != 0 {
+	swrFrame := (*swresample.Frame)(unsafe.Pointer(r.frame))
+	inputFrame := (*swresample.Frame)(unsafe.Pointer(in))
+
+	if ret := r.swr.SwrConvertFrame(swrFrame, inputFrame); ret != 0 {
 		return nil, fmt.Errorf("can not convert frame %v", avutil.ErrorFromCode(ret))
 	}
 
 	return r.frame, nil
+}
+
+func (r *Resample) Close() {
+	avutil.AvFrameFree(r.frame)
 }

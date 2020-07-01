@@ -10,9 +10,19 @@ import (
 	"unsafe"
 )
 
+//Fill the parameters struct based on the values from the supplied codec context.
+func (ctxt *Context) AvcodecParametersFromContext(pars *AvCodecParameters) int {
+	return int(C.avcodec_parameters_from_context((*C.struct_AVCodecParameters)(pars), (*C.struct_AVCodecContext)(ctxt)))
+}
+
+//Fill the codec context based on the values from the supplied codec parameters.
+func (ctxt *Context) AvcodecParametersToContext(pars *AvCodecParameters) int {
+	return int(C.avcodec_parameters_to_context((*C.struct_AVCodecContext)(ctxt), (*C.struct_AVCodecParameters)(pars)))
+}
+
 // AvCodecGetPktTimebase returns the timebase rational number as numerator and denominator
-func (ctxt *Context) AvCodecGetPktTimebase() Rational {
-	return ctxt.AvCodecGetPktTimebase()
+func (ctxt *Context) AvcodecGetPktTimebase() Rational {
+	return ctxt.AvcodecGetPktTimebase()
 }
 
 //Free the codec context and everything associated with it and write NULL to the provided pointer.

@@ -1,22 +1,16 @@
-FROM ffmpeg:builder
+#
+
+FROM ffmpeg:builder as builder
 
 WORKDIR /app
 
-RUN apt-get update -y \
-    && apt-get install -y \
-          build-essential \
-          ca-certificates \
-          g++ \
-          gcc \
-          libc-dev \
-          make \
-          cmake \
-          libssl-dev \
-          autoconf
+#COPY --from=ffmpeg /usr/local/lib/libav* /usr/local/lib/
+#COPY --from=ffmpeg /usr/local/lib/libsw** /usr/local/lib/
+#COPY --from=ffmpeg /usr/local/include/libav** /usr/local/include/
+#COPY --from=ffmpeg /usr/local/include/libsw** /usr/local/include/
 
 COPY . .
 
-ENV CGO_LDFLAGS="-lavcodec -lavformat -lavutil -lswscale -lswresample -lavdevice -lavfilter"
 ENV CGO_LDFLAGS="-lstdc++ -lm -lcrypto -lssl -ldl -lavformat -lavcodec -lswscale -lavutil -lavfilter -lswresample -lavdevice -lx264"
 ENV CGO_ENABLED=1
 

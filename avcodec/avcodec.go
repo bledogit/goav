@@ -57,6 +57,14 @@ type (
 	AvSampleFormat                C.enum_AVSampleFormat
 )
 
+func AvCodecAllocParameters() *AvCodecParameters {
+	return (*AvCodecParameters)(C.avcodec_parameters_alloc())
+}
+
+func (cp *AvCodecParameters) AvcodecParametersFree() {
+	C.avcodec_parameters_free((**C.struct_AVCodecParameters)(unsafe.Pointer(&cp)))
+}
+
 func (cp *AvCodecParameters) AvCodecGetId() CodecId {
 	return *((*CodecId)(unsafe.Pointer(&cp.codec_id)))
 }

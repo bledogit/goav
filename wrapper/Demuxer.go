@@ -1,5 +1,6 @@
 package wrapper
 
+import "C"
 import (
 	"bufio"
 	"fmt"
@@ -13,12 +14,14 @@ type Demuxer struct {
 	pipefile string
 	data     chan []byte
 	pipe     *os.File
-	packet   *avcodec.Packet
 }
 
-func (d *Demuxer) InitWithFile(file string) error {
+func NewDemuxer() *Demuxer {
+	return &Demuxer{}
+}
 
-	d.packet = avcodec.AvPacketAlloc()
+func (d *Demuxer) WithFile(file string) error {
+	fmt.Println(avformat.AvformatConfiguration())
 
 	var dacontext *avformat.Context
 
@@ -33,13 +36,13 @@ func (d *Demuxer) InitWithFile(file string) error {
 		return fmt.Errorf("couldn't find stream information")
 	}
 
-	dacontext.AvDumpFormat(0, d.pipefile, 0)
+	dacontext.AvDumpFormat(0, file, 0)
 
 	d.context = dacontext
 	return nil
 }
 
-func (d *Demuxer) InitWithPipe(reader *bufio.Reader) error {
+func (d *Demuxer) WithPipe(reader *bufio.Reader) error {
 
 	d.pipefile = "/tmp/pipe"
 
@@ -63,8 +66,6 @@ func (d *Demuxer) InitWithPipe(reader *bufio.Reader) error {
 		fmt.Print("Demuxer quit")
 	}()
 
-	d.packet = avcodec.AvPacketAlloc()
-
 	var dacontext *avformat.Context
 
 	dacontext = avformat.AvformatAllocContext()
@@ -84,11 +85,8 @@ func (d *Demuxer) InitWithPipe(reader *bufio.Reader) error {
 	return nil
 }
 
-func (d *Demuxer) Demux() *avcodec.Packet {
-	if code := d.context.AvReadFrame(d.packet); code >= 0 {
-		return d.packet
-	}
-	return nil
+func (d *Demuxer) Demux(packet *avcodec.Packet) int {
+	return d.context.AvReadFrame(packet)
 }
 
 func (d *Demuxer) GetContext() *avformat.Context {
@@ -96,5 +94,5 @@ func (d *Demuxer) GetContext() *avformat.Context {
 }
 
 func (d *Demuxer) Close() {
-
+	d.context.AvformatCloseInput()
 }

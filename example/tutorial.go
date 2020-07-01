@@ -3,6 +3,7 @@ package main
 import "C"
 import (
 	"fmt"
+	"github.com/giorgisio/goav/avcodec"
 	"github.com/giorgisio/goav/avutil"
 	"github.com/giorgisio/goav/wrapper"
 	"os"
@@ -12,13 +13,14 @@ import (
 func SaveAudioFrame(file *os.File, frame *avutil.Frame) {
 	// Open file
 	data := avutil.Data(frame)
-	linesize := avutil.Linesize(frame)
+
 	af := avutil.GetFrameAudioInfo(frame)
 	channels := avutil.AvGetNumberOfChannels(af.ChannelLayout)
 	buf := C.GoBytes(unsafe.Pointer(data[0]), C.int(af.Samples*int64(channels)*2))
 
 	file.Write(buf)
-	fmt.Println(linesize)
+	// linesize := avutil.Linesize(frame)
+	// fmt.Println(linesize)
 	// Write  data
 }
 
@@ -61,15 +63,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	demuxer := wrapper.Demuxer{}
-
-	err := demuxer.InitWithFile(os.Args[1])
+	demuxer := wrapper.NewDemuxer()
+	err := demuxer.WithFile(os.Args[1])
 	check(err)
 
-	decoder := wrapper.Decoder{}
-
-	stream := 0
-	err = decoder.Init(demuxer, stream)
+	stream := 1
+	decoder, err := wrapper.NewDecoder(demuxer, stream)
 	check(err)
 
 	resample := wrapper.NewResample(44100, "5.1", "s16")
@@ -78,23 +77,32 @@ func main() {
 	}
 
 	pcmout, _ := os.Create("out.pcm")
+	packet := avcodec.AvPacketAlloc()
 	for {
-		packet := demuxer.Demux()
+		if demuxer.Demux(packet) < 0 {
+			break
+		}
 
 		if packet != nil && packet.StreamIndex() == stream {
-			frame, err := decoder.Decode(packet)
+			frames, err := decoder.Decode(packet)
 			check(err)
 
-			if frame != nil {
+			for _, frame := range frames {
 
 				af := avutil.GetFrameAudioInfo(frame)
-				fmt.Printf("frame %d, %+v\n", packet.StreamIndex(), af)
+				fmt.Printf("stream %v frame %+v\n", packet.StreamIndex(), af)
 
 				frameout, err := resample.Resample(frame)
 				check(err)
 
 				SaveAudioFrame(pcmout, frameout)
+
+				avutil.AvFrameFree(frame)
+
 			}
 		}
 	}
+	packet.AvPacketUnref()
+	decoder.Close()
+	demuxer.Close()
 }
