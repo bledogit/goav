@@ -17,7 +17,7 @@ RUN apt-get update -y \
           make \
           cmake \
           libssl-dev \
-          autoconf
+          autoconf \
           automake \
           build-essential \
           git-core \
