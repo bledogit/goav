@@ -62,7 +62,7 @@ func (d *Decoder) Decode(packet *avcodec.Packet) ([]*avutil.Frame, error) {
 		frame := avutil.AvFrameAlloc()
 		response = d.codec.AvcodecReceiveFrame((*avcodec.Frame)(unsafe.Pointer(frame)))
 
-		if response == avutil.AvErrorEAGAIN || response == avutil.AvErrorEOF {
+		if response == avutil.AvErrorEAGAIN || response == avutil.AvErrorEINVAL || response == avutil.AvErrorEOF {
 			break
 		} else if response < 0 {
 			return nil, fmt.Errorf("Error while receiving a frame from the decoder: %v\n", avutil.ErrorFromCode(response))
