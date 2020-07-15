@@ -273,6 +273,10 @@ func GetFrameAudioInfo(f *Frame) (af AudioFrame) {
 	return
 }
 
+func GetFrameNBSample(f *Frame) int64 {
+	return int64(f.nb_samples)
+}
+
 // SetFrameAudioInfo Sets audio frame information to avframe
 func SetFrameAudioInfo(af AudioFrame, f *Frame) {
 	f.nb_samples = C.int(af.Samples)
