@@ -13,6 +13,10 @@ import "C"
 */
 import "C"
 
+import (
+	"unsafe"
+)
+
 type (
 	Context        C.struct_SwrContext
 	Frame          C.struct_AVFrame
@@ -28,6 +32,11 @@ func SwrGetClass() *Class {
 //Context constructor functions.Allocate Context.
 func SwrAlloc() *Context {
 	return (*Context)(C.swr_alloc())
+}
+
+// Free allocated Context.
+func SwrFree(ctx *Context) {
+	C.swr_free((**C.struct_SwrContext)(unsafe.Pointer(&ctx)) )
 }
 
 //Configuration accessors
