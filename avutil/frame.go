@@ -138,6 +138,10 @@ func Linesize(f *Frame) (linesize [8]int32) {
 	return
 }
 
+func Pts(f *Frame) int64 {
+	return int64(f.pts)
+}
+
 //GetPicture creates a YCbCr image from the frame
 func GetPicture(f *Frame) (img *image.YCbCr, err error) {
 	// For 4:4:4, CStride == YStride/1 && len(Cb) == len(Cr) == len(Y)/1.
@@ -284,4 +288,22 @@ func SetFrameAudioInfo(af AudioFrame, f *Frame) {
 	f.pts = C.int64_t(af.Pts)
 	f.channel_layout = C.uint64_t(af.ChannelLayout)
 	f.format = C.int(af.Format)
+}
+
+func (f *Frame) Data() (data [8]*uint8) {
+	for i := range data {
+		data[i] = (*uint8)(f.data[i])
+	}
+	return
+}
+
+func (f *Frame) Linesize() (linesize [8]int32) {
+	for i := range linesize {
+		linesize[i] = int32(f.linesize[i])
+	}
+	return
+}
+
+func (f *Frame) Pts() int64 {
+	return int64(f.pts)
 }
