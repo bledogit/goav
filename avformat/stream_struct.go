@@ -236,3 +236,15 @@ func (avs *Stream) IndexEntriesAllocatedSize() uint {
 func (avs *Stream) Free() {
 	C.av_freep(unsafe.Pointer(avs))
 }
+
+//GetAvBytesPerSample patch for goav module
+func (avs *Stream) GetAvBytesPerSample() int {
+	return int(C.av_get_bytes_per_sample(int32(avs.codecpar.format)))
+}
+
+//GetAvChannelLayoutName patch for goav module
+func (avs *Stream) GetAvChannelLayoutName() string {
+	var buf C.char
+	C.av_get_channel_layout_string(&buf, 255, avs.codecpar.channels, avs.codecpar.channel_layout)
+	return C.GoStringN(&buf, 256)
+}
