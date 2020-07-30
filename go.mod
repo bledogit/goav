@@ -1,4 +1,4 @@
-module github.com/giorgisio/goav
+module gitlab.com/nielsen-media/eng/reference/commons/goav
 
 go 1.14
 
