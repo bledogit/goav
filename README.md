@@ -1,4 +1,7 @@
 # goav
+
+Based from https://github.com/giorgisio/goav
+
 Golang binding for FFmpeg
 
 A comprehensive binding to the ffmpeg video/audio manipulation library.
