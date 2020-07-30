@@ -3,12 +3,12 @@ package main
 import (
 	"log"
 
-	"github.com/giorgisio/goav/avcodec"
-	"github.com/giorgisio/goav/avdevice"
-	"github.com/giorgisio/goav/avfilter"
-	"github.com/giorgisio/goav/avutil"
-	"github.com/giorgisio/goav/swresample"
-	"github.com/giorgisio/goav/swscale"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avcodec"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avdevice"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avfilter"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avutil"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/swresample"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/swscale"
 )
 
 func main() {

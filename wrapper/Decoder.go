@@ -2,8 +2,8 @@ package wrapper
 
 import (
 	"fmt"
-	"github.com/giorgisio/goav/avcodec"
-	"github.com/giorgisio/goav/avutil"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avcodec"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avutil"
 	"unsafe"
 )
 

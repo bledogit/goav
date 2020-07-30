@@ -4,8 +4,8 @@ import "C"
 import (
 	"bufio"
 	"fmt"
-	"github.com/giorgisio/goav/avcodec"
-	"github.com/giorgisio/goav/avformat"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avcodec"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avformat"
 	"os"
 )
 

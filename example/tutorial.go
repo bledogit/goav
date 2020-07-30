@@ -3,9 +3,9 @@ package main
 import "C"
 import (
 	"fmt"
-	"github.com/giorgisio/goav/avcodec"
-	"github.com/giorgisio/goav/avutil"
-	"github.com/giorgisio/goav/wrapper"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avcodec"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avutil"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/wrapper"
 	"os"
 	"unsafe"
 )

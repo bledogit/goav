@@ -12,7 +12,7 @@ package swresample
 */
 import "C"
 import (
-	"github.com/giorgisio/goav/avutil"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avutil"
 	"unsafe"
 )
 

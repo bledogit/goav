@@ -2,8 +2,8 @@ package wrapper
 
 import (
 	"fmt"
-	"github.com/giorgisio/goav/avutil"
-	"github.com/giorgisio/goav/swresample"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avutil"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/swresample"
 	"unsafe"
 )
 
@@ -38,6 +38,7 @@ func (r *Resample) reallocFrame(in *avutil.Frame) error {
 	nchannels := int64(avutil.AvGetNumberOfChannels(aframe.ChannelLayout))
 
 	///
+	fmt.Println("Allocating ", nchannels, aframe.Samples, r.targetSampleFmt)
 	if ret := avutil.AvAllocSamples(r.frame, nchannels, aframe.Samples, r.targetSampleFmt, 0); ret <= 0 {
 		return fmt.Errorf("can not allocate samples %v", avutil.ErrorFromCode(ret))
 	}
@@ -90,7 +91,7 @@ func (r *Resample) Resample(in *avutil.Frame) (out *avutil.Frame, err error) {
 		if err != nil {
 			return nil, err
 		}
-		r.initialized = true
+		r.initialized = false
 	}
 
 	swrFrame := (*swresample.Frame)(unsafe.Pointer(r.frame))

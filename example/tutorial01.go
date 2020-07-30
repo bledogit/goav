@@ -24,9 +24,9 @@ import (
 	"os"
 	"unsafe"
 
-	"github.com/giorgisio/goav/avcodec"
-	"github.com/giorgisio/goav/avformat"
-	"github.com/giorgisio/goav/avutil"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avcodec"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avformat"
+	"gitlab.com/nielsen-media/eng/reference/commons/goav/avutil"
 )
 
 func main() {
