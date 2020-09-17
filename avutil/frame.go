@@ -53,6 +53,17 @@ type AudioFrame struct {
 	Pts           int64
 	ChannelLayout int64
 	Format        SampleFormat
+	PacketSize    int64
+}
+
+// AudioFrame exports AvFrame fields
+type VideoFrame struct {
+	Width      int
+	Height     int
+	Pts        int64
+	KeyFrame   int
+	Format     SampleFormat
+	PacketSize int64
 }
 
 func AvprivFrameGetMetadatap(f *Frame) *Dictionary {
@@ -273,6 +284,7 @@ func GetFrameAudioInfo(f *Frame) (af AudioFrame) {
 	af.Pts = int64(f.pts)
 	af.ChannelLayout = int64(f.channel_layout)
 	af.Format = SampleFormat(f.format)
+	af.PacketSize = int64(f.pkt_size)
 
 	return
 }
@@ -288,6 +300,31 @@ func SetFrameAudioInfo(af AudioFrame, f *Frame) {
 	f.pts = C.int64_t(af.Pts)
 	f.channel_layout = C.uint64_t(af.ChannelLayout)
 	f.format = C.int(af.Format)
+}
+
+// GetFrameAudioInfo exports audio frame information from AvFrame
+func (f *Frame) GetFrameAudioInfo() (af AudioFrame) {
+	af.Samples = int64(f.nb_samples)
+	af.SampleRate = int64(f.sample_rate)
+	af.Pts = int64(f.pts)
+	af.ChannelLayout = int64(f.channel_layout)
+	af.Format = SampleFormat(f.format)
+	af.PacketSize = int64(f.pkt_size)
+
+	return
+}
+
+// GetFrameVideoInfo exports audio frame information from AvFrame
+func (f *Frame) GetFrameVideoInfo() (vf VideoFrame) {
+
+	vf.Pts = int64(f.pts)
+	vf.Format = SampleFormat(f.format)
+	vf.PacketSize = int64(f.pkt_size)
+	vf.Width = int(f.width)
+	vf.Height = int(f.height)
+	vf.KeyFrame = int(f.key_frame)
+
+	return
 }
 
 func (f *Frame) Data() (data [8]*uint8) {
